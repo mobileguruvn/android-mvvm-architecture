@@ -1,3 +1,6 @@
 <resources>
-    <string name="app_name">android-mvvm-architecture</string>
+    <string name="app_name">Photos App</string>
+
+    <string name="photo_list_title">Photos List</string>
+    <string name="photo_detail_title">Photos Detail</string>
 </resources>

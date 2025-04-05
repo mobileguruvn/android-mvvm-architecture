@@ -69,7 +69,7 @@ dependencies {
     implementation(libs.room.ktx)
 
     // Navigation
-
+    implementation(libs.hilt.navigation.compose)
 
     // Dagger-Hilt
     implementation(libs.hilt.android)
