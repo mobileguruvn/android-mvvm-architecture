@@ -17,6 +17,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "API_BASE_URL", "\"${project.property("API_BASE_URL")}\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -38,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
