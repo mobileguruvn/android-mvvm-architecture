@@ -52,9 +52,9 @@ import kotlin.random.Random
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 @Composable
 fun PhotosScreen(
+    modifier: Modifier = Modifier,
     viewModel: PhotosViewModel = hiltViewModel(),
     onPhotoClick: (Int) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val isShowingFavouritePhoto by viewModel.isShowingFavouritePhotos.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -70,14 +70,16 @@ fun PhotosScreen(
         val uiState by viewModel.uiState.collectAsState()
 
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
             SearchView(
                 searchQuery = searchQuery,
                 onSearchQueryChange = viewModel::searchPhotos,
-                modifier = modifier.padding(start = 16.dp, end = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             when (uiState) {
@@ -86,7 +88,8 @@ fun PhotosScreen(
                     PhotoList(
                         photos = photos,
                         onPhotoClick = onPhotoClick,
-                        modifier = modifier.padding(horizontal = 16.dp)
+                        modifier = modifier
+                            .padding(horizontal = 16.dp)
                     )
                 }
 
@@ -138,7 +141,7 @@ private fun PhotoItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .padding(vertical = 8.dp)
             .clickable {
                 onPhotoClick(photo.id)
             }

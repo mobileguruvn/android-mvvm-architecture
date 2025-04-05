@@ -1,5 +1,7 @@
 package com.brian.android_mvvm_architecture.di
 
+import com.brian.android_mvvm_architecture.BuildConfig
+import com.brian.android_mvvm_architecture.data.remote.api.PhotoService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -67,4 +69,9 @@ object NetworkModule {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun providePhotoApi(retrofit: Retrofit): PhotoService =
+        retrofit.create(PhotoService::class.java)
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.brian.android_mvvm_architecture.data.model.FavouritePhoto
 import com.brian.android_mvvm_architecture.data.repository.PhotoRepository
 import com.brian.android_mvvm_architecture.ui.mapper.toPhotoUi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +23,7 @@ import javax.inject.Inject
 
 @FlowPreview
 @ExperimentalCoroutinesApi
+@HiltViewModel
 class PhotosViewModel @Inject constructor(private val photoRepository: PhotoRepository) :
     ViewModel() {
 

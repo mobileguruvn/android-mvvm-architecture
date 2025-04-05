@@ -51,6 +51,7 @@ class PhotoRepositoryImpl @Inject constructor(
         }.flowOn(ioDispatcher)
     }
 
+    // TODO: Consider enhance this function
     override fun getPhotoById(id: Int): Flow<Result<FavouritePhoto>> {
         return flow {
             val photo = photoDao.getPhotoById(id)
