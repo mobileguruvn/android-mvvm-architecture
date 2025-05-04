@@ -91,29 +91,33 @@ fun PhotoDetailContent(photoUi: PhotoUi, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
-        Image(
-            painter = rememberAsyncImagePainter(photoUi.imageUrl),
-            contentDescription = photoUi.title,
-            modifier = Modifier
-                .size(250.dp)
-                .background(Color.LightGray)
-                .clip(RoundedCornerShape(16.dp))
-        )
-
+        PhotoImage(photoUi.imageUrl, photoUi.title)
         Spacer(modifier = Modifier.height(32.dp))
-
-        // Photo title
-        Text(
-            text = photoUi.title,
-            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center
-        )
-
+        PhotoTitle(photoUi.title)
         Spacer(modifier = Modifier.height(8.dp))
 
-
     }
+}
+
+@Composable
+private fun PhotoImage(imageUrl: String, contentDescription: String) {
+    Image(
+        painter = rememberAsyncImagePainter(imageUrl),
+        contentDescription = contentDescription,
+        modifier = Modifier
+            .size(250.dp)
+            .background(Color.LightGray)
+            .clip(RoundedCornerShape(16.dp))
+    )
+}
+
+@Composable
+private fun PhotoTitle(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+        textAlign = TextAlign.Center
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

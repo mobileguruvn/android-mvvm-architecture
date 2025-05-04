@@ -1,6 +1,5 @@
 package com.brian.android_mvvm_architecture.ui.photos
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -55,18 +54,18 @@ fun PhotosScreen(
     viewModel: PhotosViewModel = hiltViewModel(),
     onPhotoClick: (Int) -> Unit,
 ) {
-    val isShowingFavouritePhoto by viewModel.isShowingFavouritePhotos.collectAsState()
+    val isFavourite by viewModel.isShowingFavouritePhotos.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
             PhotoActionTopBar(
-                isFavourite = isShowingFavouritePhoto,
+                isFavourite = isFavourite,
                 onActionClick = { viewModel.toggleFavourite() },
             )
         }
     ) { contentPadding ->
-        val uiState by viewModel.uiState.collectAsState()
 
         Column(
             modifier = modifier
@@ -81,28 +80,37 @@ fun PhotosScreen(
                     .padding(start = 16.dp, end = 16.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            when (uiState) {
-                is PhotosUiState.Success -> {
-                    val photos = (uiState as PhotosUiState.Success).photos
-                    PhotoList(
-                        photos = photos,
-                        onPhotoClick = onPhotoClick,
-                        modifier = modifier
-                            .padding(horizontal = 16.dp)
-                    )
-                }
-
-                is PhotosUiState.Error -> {
-                    InitialLoadingError(errorMessage = (uiState as PhotosUiState.Error).message)
-                }
-
-                is PhotosUiState.Loading -> {
-                    InitialLoading()
-                }
-            }
+            PhotosContent(uiState, onPhotoClick)
         }
     }
 
+}
+
+@Composable
+private fun PhotosContent(
+    uiState: PhotosUiState,
+    onPhotoClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    when (uiState) {
+        is PhotosUiState.Success -> {
+            val photos = uiState.photos
+            PhotoList(
+                photos = photos,
+                onPhotoClick = onPhotoClick,
+                modifier = modifier
+                    .padding(horizontal = 16.dp)
+            )
+        }
+
+        is PhotosUiState.Error -> {
+            ShowErrorView(errorMessage = uiState.message)
+        }
+
+        is PhotosUiState.Loading -> {
+            ShowLoadingView()
+        }
+    }
 }
 
 @Composable
@@ -126,17 +134,8 @@ private fun PhotoList(
 private fun PhotoItem(
     photo: PhotoUi,
     onPhotoClick: (Int) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    val randomColor = remember {
-        Color(
-            red = Random.nextFloat(),
-            green = Random.nextFloat(),
-            blue = Random.nextFloat(),
-            alpha = 1f
-        )
-    }
-
+    val avatarColor = generateRandomColor()
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -148,13 +147,13 @@ private fun PhotoItem(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = "photo",
                 modifier = Modifier
                     .size(100.dp)
                     .padding(8.dp)
-                    .background(randomColor, CircleShape)
+                    .background(avatarColor, CircleShape)
                     .clip(CircleShape),
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -166,6 +165,16 @@ private fun PhotoItem(
             Spacer(modifier = Modifier.width(8.dp))
         }
     }
+}
+
+@Composable
+private fun generateRandomColor(): Color = remember {
+    Color(
+        red = Random.nextFloat(),
+        green = Random.nextFloat(),
+        blue = Random.nextFloat(),
+        alpha = 1f
+    )
 }
 
 @Composable
@@ -223,14 +232,14 @@ private fun ShowEmptyView() {
 }
 
 @Composable
-private fun InitialLoading() {
+private fun ShowLoadingView() {
     Box(modifier = Modifier.fillMaxSize()) {
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
     }
 }
 
 @Composable
-private fun InitialLoadingError(errorMessage: String) {
+private fun ShowErrorView(errorMessage: String) {
     Box(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Failed to load data: $errorMessage",
