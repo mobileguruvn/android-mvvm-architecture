@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,12 +50,12 @@ fun PhotoDetailScreen(
     viewModel: PhotoDetailViewModel = hiltViewModel(),
     navigateUp: () -> Unit,
 ) {
-    var isShowDialogConfirmation by remember { mutableStateOf(false) }
+    var isShowDialogConfirmation by rememberSaveable { mutableStateOf(false) }
 
     if (isShowDialogConfirmation) {
         DislikeConfirmationDialog(
             onConfirm = {
-                viewModel.toggleFavorite(photoId = photoUi.id, isFavourite = photoUi.isFavourite)
+                viewModel.toggleFavorite(photoId = photoUi.id, isFavourite = false)
                 isShowDialogConfirmation = false
             },
             onDismiss = { isShowDialogConfirmation = false }
@@ -73,16 +76,18 @@ fun PhotoDetailScreen(
                 })
         }
     ) { contentPadding ->
-        PhotoDetailContent(photoUi)
+        PhotoDetailContent(
+            photoUi, modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+        )
     }
 }
 
 @Composable
-fun PhotoDetailContent(photoUi: PhotoUi) {
+fun PhotoDetailContent(photoUi: PhotoUi, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -132,7 +137,7 @@ private fun PhotoDetailActionTopBar(
         actions = {
             IconButton(onClick = { onToggleFavorite(photoUi) }) {
                 Icon(
-                    imageVector = if (photoUi.isFavourite) Icons.Default.Star else Icons.Default.FavoriteBorder,
+                    imageVector = if (photoUi.isFavourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = "back"
                 )
             }
