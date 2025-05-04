@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -51,15 +50,11 @@ class PhotoRepositoryImpl @Inject constructor(
         }.flowOn(ioDispatcher)
     }
 
-    // TODO: Consider enhance this function
     override fun getPhotoById(id: Int): Flow<Result<FavouritePhoto>> {
-        return flow {
-            val photo = photoDao.getPhotoById(id)
-            if (photo != null) {
-                emit(Result.success(photo.toFavouritePhoto()))
-            } else {
-                emit(Result.failure(Exception("Photo not found")))
-            }
+        return photoDao.getPhotoById(id).map {
+            Result.success(it.toFavouritePhoto())
+        }.catch { e ->
+            emit(Result.failure(Exception("No photo found")))
         }.flowOn(ioDispatcher)
     }
 

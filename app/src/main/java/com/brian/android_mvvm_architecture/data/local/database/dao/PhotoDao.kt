@@ -14,7 +14,7 @@ interface PhotoDao {
     fun getPhotos(): Flow<List<PhotoEntity>>
 
     @Query("SELECT * FROM photos WHERE id = :id")
-    suspend fun getPhotoById(id: Int): PhotoEntity?
+    fun getPhotoById(id: Int): Flow<PhotoEntity>
 
     @Query("SELECT * FROM photos WHERE isFavourite = 1")
     fun getFavouritePhotos(): Flow<List<PhotoEntity>>
