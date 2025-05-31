@@ -92,4 +92,15 @@ data class PhotoUi(
     val imageUrl: String,
     val thumbnailUrl: String,
     val isFavourite: Boolean,
-)
+) {
+    companion object {
+
+        val EMPTY_PHOTO_UI = PhotoUi(
+            id = 0,
+            title = "",
+            imageUrl = "",
+            thumbnailUrl = "",
+            isFavourite = false
+        )
+    }
+}
