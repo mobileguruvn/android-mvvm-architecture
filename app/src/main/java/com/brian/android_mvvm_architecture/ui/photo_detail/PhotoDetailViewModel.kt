@@ -1,10 +1,12 @@
 package com.brian.android_mvvm_architecture.ui.photo_detail
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.brian.android_mvvm_architecture.data.repository.PhotoRepository
 import com.brian.android_mvvm_architecture.di.Dispatcher
 import com.brian.android_mvvm_architecture.di.PhotoDispatcher
+import com.brian.android_mvvm_architecture.navigation.PHOTO_ID
 import com.brian.android_mvvm_architecture.ui.mapper.toPhotoUi
 import com.brian.android_mvvm_architecture.ui.photos.PhotoUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,11 +23,18 @@ import javax.inject.Inject
 @HiltViewModel
 class PhotoDetailViewModel @Inject constructor(
     private val photoRepository: PhotoRepository,
+    savedStateHandle: SavedStateHandle,
     @Dispatcher(PhotoDispatcher.IO) private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
+    private val photoId: Int = checkNotNull(savedStateHandle[PHOTO_ID])
+
     private val _uiState = MutableStateFlow<PhotoDetailUiState>(PhotoDetailUiState.Loading)
     val uiState: StateFlow<PhotoDetailUiState> = _uiState.asStateFlow()
+
+    init {
+        getPhoto(photoId)
+    }
 
     fun getPhoto(photoId: Int) {
         viewModelScope.launch {
@@ -63,4 +72,8 @@ sealed interface PhotoDetailUiState {
     data class Success(val photo: PhotoUi) : PhotoDetailUiState
     data class Error(val message: String) : PhotoDetailUiState
     object Loading : PhotoDetailUiState
+}
+
+fun PhotoDetailUiState.asPhotoUiOrEmpty(): PhotoUi {
+    return (this as? PhotoDetailUiState.Success)?.photo ?: PhotoUi.EMPTY_PHOTO_UI
 }

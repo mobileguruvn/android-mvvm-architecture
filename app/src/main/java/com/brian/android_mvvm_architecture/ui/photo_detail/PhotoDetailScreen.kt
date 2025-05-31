@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -13,8 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,11 +25,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,16 +45,19 @@ import com.brian.android_mvvm_architecture.ui.photos.PhotoUi
 
 @Composable
 fun PhotoDetailScreen(
-    photoUi: PhotoUi,
     viewModel: PhotoDetailViewModel = hiltViewModel(),
     navigateUp: () -> Unit,
 ) {
+    val state by viewModel.uiState.collectAsState()
+
+    val photoUi = state.asPhotoUiOrEmpty()
+
     var isShowDialogConfirmation by rememberSaveable { mutableStateOf(false) }
 
     if (isShowDialogConfirmation) {
         DislikeConfirmationDialog(
             onConfirm = {
-                viewModel.toggleFavorite(photoId = photoUi.id, isFavourite = false)
+                viewModel.toggleFavorite(photoId = photoUi.id, false)
                 isShowDialogConfirmation = false
             },
             onDismiss = { isShowDialogConfirmation = false }
@@ -67,27 +69,59 @@ fun PhotoDetailScreen(
             PhotoDetailActionTopBar(
                 photoUi = photoUi,
                 navigateUp = navigateUp,
+                enable = state is PhotoDetailUiState.Success,
                 onToggleFavorite = {
                     if (photoUi.isFavourite) {
                         isShowDialogConfirmation = true
                     } else {
-                        viewModel.toggleFavorite(photoId = photoUi.id, isFavourite = true)
+                        viewModel.toggleFavorite(photoId = photoUi.id, true)
                     }
                 })
         }
     ) { contentPadding ->
-        PhotoDetailContent(
-            photoUi, modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-        )
+        when (state) {
+            is PhotoDetailUiState.Loading -> {
+                ShowLoading(contentPadding = contentPadding)
+            }
+
+            is PhotoDetailUiState.Success -> {
+                val photoUi = (state as PhotoDetailUiState.Success).photo
+                PhotoDetailContent(
+                    photoUi = photoUi,
+                    contentPadding = contentPadding
+                )
+            }
+
+            is PhotoDetailUiState.Error -> {
+                ShowError(contentPadding = contentPadding)
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun ShowLoading(contentPadding: PaddingValues = PaddingValues(0.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Loading...")
     }
 }
 
 @Composable
-fun PhotoDetailContent(photoUi: PhotoUi, modifier: Modifier = Modifier) {
+fun PhotoDetailContent(
+    photoUi: PhotoUi,
+    contentPadding: PaddingValues,
+) {
     Column(
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -96,6 +130,19 @@ fun PhotoDetailContent(photoUi: PhotoUi, modifier: Modifier = Modifier) {
         PhotoTitle(photoUi.title)
         Spacer(modifier = Modifier.height(8.dp))
 
+    }
+}
+
+@Composable
+private fun ShowError(contentPadding: PaddingValues) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Something went wrong 😢")
     }
 }
 
@@ -126,6 +173,7 @@ private fun PhotoDetailActionTopBar(
     photoUi: PhotoUi,
     navigateUp: () -> Unit,
     onToggleFavorite: (PhotoUi) -> Unit,
+    enable: Boolean,
     modifier: Modifier = Modifier,
 ) {
     CenterAlignedTopAppBar(
@@ -135,11 +183,14 @@ private fun PhotoDetailActionTopBar(
         modifier = modifier,
         navigationIcon = {
             IconButton(onClick = navigateUp) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "back"
+                )
             }
         },
         actions = {
-            IconButton(onClick = { onToggleFavorite(photoUi) }) {
+            IconButton(onClick = { onToggleFavorite(photoUi) }, enabled = enable) {
                 Icon(
                     imageVector = if (photoUi.isFavourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = "back"
